@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!-- This first line tells the browser that this is a modern HTML5 page. -->
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hemagglutinin 3UBE</title>
+
+  <!--
+    JSmol is the JavaScript version of Jmol.
+    This file must be in the jsmol folder next to this HTML file.
+  -->
+  <script src="jsmol/JSmol.min.js"></script>
+
+  <script>
+    /*
+      JavaScript variables and functions go inside the <script> element.
+      JavaScript controls what happens when the page loads or a button is clicked.
+    */
+
+    // This variable will store the JSmol molecular viewer after it is created.
+    var jmol;
+
+    /*
+      Info is a JavaScript object. It tells JSmol how to create the viewer.
+      The names before the colons are settings; the values after the colons
+      tell JSmol what those settings should be.
+    */
+    var Info = {
+      width: 700,                 // width of the molecular viewer in pixels
+      height: 600,                // height of the molecular viewer in pixels
+      use: "HTML5",              // use a browser-based viewer, not Java
+      j2sPath: "jsmol/j2s",      // location of JSmol's supporting files
+      color: "white",             // background color of the viewer
+      addSelectionOptions: false,
+
+      /*
+        This is the Jmol script that runs automatically when the viewer starts.
+        The plus signs join several text strings into one long Jmol script.
+        Semicolons separate Jmol commands.
+      */
+      script:
+        "load models/3UBE.pdb;" +  // load the local PDB file
+        "select all;" +             // select every atom in the model
+        "cartoons only;" +          // show protein cartoons; hide other styles
+        "color structure;" +        // color helices, sheets, and loops differently
+        "center;"                   // center the visible model
+    };
+
+    /*
+      This function runs when the webpage finishes loading.
+
+      Jmol.getApplet creates the molecular viewer and stores it in the variable
+      jmol. Jmol.getAppletHtml converts that viewer into HTML that the browser
+      can place on the page.
+    */
+    function startJmol() {
+      jmol = Jmol.getApplet("jmol", Info);
+      document.getElementById("jmolWindow").innerHTML =
+        Jmol.getAppletHtml(jmol);
+    }
+
+    /*
+      This function creates one clean molecular view.
+      It is called by the button below.
+    */
+    function showAssemblyOne() {
+      var script =
+        "select all;" +
+        "cartoons off;" +            // remove any previous cartoon display
+        "wireframe off;" +           // remove sticks/wireframe bonds
+        "spacefill off;" +           // remove atom spheres
+        "ribbons off;" +             // remove ribbon representation, if present
+        "select :A or :B or :C or :D or :E or :F;" +
+        "restrict selected;" +        // hide all atoms outside chains A-F
+        "cartoons on;" +              // show the selected protein as cartoons
+        "color chains;" +             // give each chain its own color
+        "center selected;" +          // center chains A-F in the viewer
+        "zoom 120;" +
+       /* "rotate x -55;" + 
+        "rotate y 54;" +
+        "rotate z 168;" + */
+        "spin off";;                // adjust magnification
+
+      // Send the Jmol script to the viewer.
+      Jmol.script(jmol, script);
+    }
+
+function orientMonomer() {
+  var script =
+    "spin off;" +
+    "reset;" +
+    "center {20.4030031888798 -40.59923483237941 19.681210956663886};" +
+    "rotate z 167.94;" +
+    "rotate y 53.9;" +
+    "rotate z -109.78;" +
+    "zoom 120.0;" +
+    "set rotationRadius 114.52;";
+
+  Jmol.script(jmol, script);
+}
+function startRotations(){
+  var script = "spin on;"
+Jmol.script(jmol,script)
+}
+
+    function showMonomerAB() {
+  var script =
+    "select all;" +
+    "cartoons off;" +
+    "wireframe off;" +
+    "spacefill off;" +
+    "ribbons off;" +
+
+    "select :A or :B;" +
+    "restrict selected;" +
+    "cartoons on;" +
+    "color chains;" +
+    "center selected;" +
+    "zoom 120;"+
+    "spin on";;
+
+  Jmol.script(jmol, script);
+}
+function stopRotations(){
+  var script = "spin off;"
+Jmol.script(jmol,script)
+}
+  </script>
+</head>
+
+<!-- onload calls startJmol after the browser has loaded the page. -->
+<body onload="startJmol()">
+
+  <h1>Hemagglutinin Structure 3UBE</h1>
+
+  <p>
+    First explore one hemagglutinin assembly. Chains A-F form the first
+    protein assembly in this model.
+  </p>
+
+  <!--
+    This empty div is a named space on the webpage.
+    startJmol() inserts the molecular viewer into this space.
+  -->
+  <div id="jmolWindow">
+    Loading molecular viewer...
+  </div>
+
+  <!-- Clicking this button calls the JavaScript function above. -->
+  <p>
+    <button onclick="showAssemblyOne()">
+      Show one hemagglutinin assembly
+    </button>
+        <button onclick="orientMonomer()">
+       Orient monomer
+     </button>
+     <button onclick="startRotations()">Start Rotation</button>
+    <button onclick="showMonomerAB()">
+       Show one HA monomer A+B
+     </button>
+     <button onclick="stopRotations()">Stop Rotation</button>
+  </p>
+
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="JSmol.min.js"></script>
+
+<script type="text/javascript">
+var jmolApplet0 = 'jmolApplet0';
+var Info = {
+	width: 450,
+	height: 450,
+	use: "HTML5",
+	j2sPath: "j2s",
+	script: 'load =1crn'
+}
+function myPrompt(msg, btns) {
+	let d = document.getElementById("dialogDiv");
+	let c = document.getElementById("dialogBtns");
+	document.getElementById("dialogMsgDiv").textContent = msg;
+	c.innerHTML = "";
+	for (let b of btns) {
+		let btn = document.createElement("button");
+		btn.setAttribute("value", b.btnVal);
+		btn.textContent = b.btnTxt;
+		btn.style.margin="0 1em";
+		c.appendChild(btn);
+	}
+	return new Promise(resolve => {
+		d.addEventListener("close", function closeD() {
+			d.removeEventListener("close", closeD);
+			resolve(d.returnValue);
+		});
+		d.showModal();
+	});
+}
+
+async function getPrompt(msg,btn1,btn2) {
+	let opcion = await myPrompt(
+		msg,
+		[
+			{ btnTxt: btn1, btnVal: btn1 },
+			{ btnTxt: btn2, btnVal: btn2 }
+		]
+	);
+	//document.getElementById("out").textContent = opcion;
+	$('#out').html(opcion);
+	Jmol.script(jmolApplet0, "set echo top center; echo " + opcion);
+}
+
+</script>
+</head>
+<body>
+
+
+<script type="text/javascript">
+ jmolApplet0 = Jmol.getApplet("jmolApplet0", Info);
+ // example from JmolScript:  javascript getPrompt('Please choose:', 'Option 1', 'Option 2')
+</script>
+
+<dialog id="dialogDiv">
+	<div id="dialogMsgDiv" style="margin-bottom:1em;"></div>
+	<form method="dialog" id="dialogBtns"></form>
+</dialog>
+
+<input type="button" value="open prompt" onClick="getPrompt('Please choose:', 'Option 1', 'Option 2')"><br>
+<br>
+<input type="button" value="value from prompt" onClick="alert($('#out').html())"><br>
+
+<span id="out">..output..</span>
+
+
+</body>
+</html>
