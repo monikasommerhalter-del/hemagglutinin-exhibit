@@ -11,6 +11,17 @@
     This file must be in the jsmol folder next to this HTML file.
   -->
   <script src="jsmol/JSmol.min.js"></script>
+  <style>
+  .ha1-label {
+    color: #2f6f9f;
+    font-weight: bold;
+  }
+
+  .ha2-label {
+    color: #c000a0;
+    font-weight: bold;
+  }
+</style>
 
   <script>
     /*
@@ -31,7 +42,7 @@
       height: 600,                // height of the molecular viewer in pixels
       use: "HTML5",              // use a browser-based viewer, not Java
       j2sPath: "jsmol/j2s",      // location of JSmol's supporting files
-      color: "white",             // background color of the viewer
+      color: "black",             // background color of the viewer
       addSelectionOptions: false,
 
       /*
@@ -42,11 +53,25 @@
       script:
         "load models/3UBE.pdb;" +  // load the local PDB file
         "select all;" +             // select every atom in the model
-        "cartoons only;" +          // show protein cartoons; hide other styles
-        "color structure;" +        // color helices, sheets, and loops differently
-        "center;"                   // center the visible model
+       "cartoons off;" +            // remove any previous cartoon display
+        "wireframe off;" +           // remove sticks/wireframe bonds
+        "spacefill off;" +           // remove atom spheres
+        "ribbons off;" +             // remove ribbon representation, if present
+        "select :A or :B or :C or :D or :E or :F;" +
+        "restrict selected;" +        // hide all atoms outside chains A-F
+        "cartoons on;" +              // show the selected protein as cartoons
+        "color chains;" +             // give each chain its own color
+        "center selected;" +          // center chains A-F in the viewer
+        "zoom 180;" +
+        "reset;" +
+    "center {20.4030031888798 -40.59923483237941 19.681210956663886};" +
+    "rotate z 167.94;" +
+    "rotate y 53.9;" +
+    "rotate z -109.78;" +
+    "set rotationRadius 114.52;"+
+        "spin off;"              // adjust magnification
     };
-
+var isSpinning = false; 
     /*
       This function runs when the webpage finishes loading.
 
@@ -64,69 +89,150 @@
       This function creates one clean molecular view.
       It is called by the button below.
     */
-    function showAssemblyOne() {
-      var script =
-        "select all;" +
-        "cartoons off;" +            // remove any previous cartoon display
-        "wireframe off;" +           // remove sticks/wireframe bonds
-        "spacefill off;" +           // remove atom spheres
-        "ribbons off;" +             // remove ribbon representation, if present
-        "select :A or :B or :C or :D or :E or :F;" +
-        "restrict selected;" +        // hide all atoms outside chains A-F
-        "cartoons on;" +              // show the selected protein as cartoons
-        "color chains;" +             // give each chain its own color
-        "center selected;" +          // center chains A-F in the viewer
-        "zoom 120;" +
-       /* "rotate x -55;" + 
-        "rotate y 54;" +
-        "rotate z 168;" + */
-        "spin off";;                // adjust magnification
-
-      // Send the Jmol script to the viewer.
-      Jmol.script(jmol, script);
-    }
+   
 
 function orientMonomer() {
   var script =
     "spin off;" +
-    "reset;" +
-    "center {20.4030031888798 -40.59923483237941 19.681210956663886};" +
-    "rotate z 167.94;" +
-    "rotate y 53.9;" +
-    "rotate z -109.78;" +
-    "zoom 120.0;" +
-    "set rotationRadius 114.52;";
+
 
   Jmol.script(jmol, script);
 }
-function startRotations(){
-  var script = "spin on;"
-Jmol.script(jmol,script)
+
+function toggleRotation() {
+  if (isSpinning === false) {
+    Jmol.script(jmol, "spin on;");
+    isSpinning = true;
+    document.getElementById("rotationButton").textContent =
+      "Stop Rotation";
+  } else {
+    Jmol.script(jmol, "spin off;");
+    isSpinning = false;
+    document.getElementById("rotationButton").textContent =
+      "Start Rotation";
+  }
+}
+function updateRotationButton(spinning) {
+  isSpinning = spinning;
+
+  document.getElementById("rotationButton").textContent =
+    spinning ? "Stop Rotation" : "Start Rotation";
 }
 
-    function showMonomerAB() {
+  function showMonomerAB() {
+  var script =
+  "select :A or :B;" +
+  "restrict selected;" +
+  "cartoons on;" +
+
+  "select :A;" +
+"color [x2f6f9f];" +
+
+  "select :B;" +
+  "color [xc000a0];" +
+
+  "select :A or :B;" +
+  "center selected;" +
+  "zoom 120;" +
+  "spin off;";
+
+  Jmol.script(jmol, script);
+
+  // The monomer view is now stationary.
+  updateRotationButton(false);
+
+  document.getElementById("textPanel").innerHTML = `
+  <h2>One HA monomer</h2>
+
+  <p>
+    This view shows chains A and B, which together form one
+    functional hemagglutinin monomer.
+  </p>
+
+  <p>
+    Chain A represents
+    <span class="ha1-label">HA1</span>, while chain B represents
+    <span class="ha2-label">HA2</span>.
+    These two pieces came from one precursor protein that was
+    cleaved during maturation.
+  </p>
+
+  <p>
+    The two pieces remain connected by disulfide bonds and work
+    together as one structural unit.
+  </p>
+`;
+}
+function resetTrimerView() {
   var script =
     "select all;" +
+    "restrict none;" +
     "cartoons off;" +
     "wireframe off;" +
     "spacefill off;" +
     "ribbons off;" +
 
-    "select :A or :B;" +
+    "select :A or :B or :C or :D or :E or :F;" +
     "restrict selected;" +
     "cartoons on;" +
     "color chains;" +
     "center selected;" +
-    "zoom 120;"+
-    "spin on";;
+    "zoom 180;" +
+
+    "reset;" +
+    "center {20.4030031888798 -40.59923483237941 19.681210956663886};" +
+    "rotate z 167.94;" +
+    "rotate y 53.9;" +
+    "rotate z -109.78;" +
+    "set rotationRadius 114.52;" +
+    "spin off;";
 
   Jmol.script(jmol, script);
+
+  updateRotationButton(false);
+    document.getElementById("textPanel").innerHTML = `
+  <h2>The hemagglutinin trimer</h2>
+
+  <p>
+    Hemagglutinin is assembled as a trimer of three similar protein
+    units. Each unit contains an HA1 and an HA2 portion.
+  </p>
+
+`;
 }
-function stopRotations(){
-  var script = "spin off;"
-Jmol.script(jmol,script)
-}
+
   </script>
+
+  <style>
+  .exhibit-layout {
+    display: flex;
+    gap: 25px;
+    align-items: flex-start;
+  }
+
+  #jmolWindow {
+    flex: 0 0 700px;
+  }
+
+  .explanation {
+    width: 300px;
+    padding: 15px;
+    border: 1px solid #cccccc;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    font-family: Arial, sans-serif;
+    line-height: 1.4;
+  }
+
+  .explanation h2 {
+    margin-top: 0;
+  }
+
+  button {
+    margin: 5px;
+    padding: 8px 12px;
+  }
+</style>
 </head>
 
 <!-- onload calls startJmol after the browser has loaded the page. -->
@@ -134,33 +240,63 @@ Jmol.script(jmol,script)
 
   <h1>Hemagglutinin Structure 3UBE</h1>
 
-  <p>
-    First explore one hemagglutinin assembly. Chains A-F form the first
-    protein assembly in this model.
-  </p>
+    <h2>The hemagglutinin trimer</h2>
 
+    <p>
+      This view shows one hemagglutinin assembly. The three protein
+      chains are displayed as cartoons and colored by chain.
+    </p>
+
+    <p>
+      The Jelly Roll page will next focus on a smaller region within
+      one of these chains.
+    </p>
+ 
+  <!--  Code below will make a link as an alternative to a button: 
+    <p> 
+      <a href="jelly-roll.html">
+    Explore the Jelly-Roll Fold
+  </a> 
+</p>
+-->
+
+<a href="jelly-roll.html">
+  <button>Explore the Jelly-Roll Fold</button>
+</a>
   <!--
-    This empty div is a named space on the webpage.
+    This  div is a named space on the webpage.
     startJmol() inserts the molecular viewer into this space.
   -->
+<div class="exhibit-layout">
+
+  <!-- Molecular viewer -->
   <div id="jmolWindow">
     Loading molecular viewer...
   </div>
 
-  <!-- Clicking this button calls the JavaScript function above. -->
+  <!-- Text beside the viewer -->
+<div class="explanation" id="textPanel">
+  <h2>The hemagglutinin trimer</h2>
+
   <p>
-    <button onclick="showAssemblyOne()">
-      Show one hemagglutinin assembly
-    </button>
-        <button onclick="orientMonomer()">
-       Orient monomer
-     </button>
-     <button onclick="startRotations()">Start Rotation</button>
-    <button onclick="showMonomerAB()">
-       Show one HA monomer A+B
-     </button>
-     <button onclick="stopRotations()">Stop Rotation</button>
+    Hemagglutinin is assembled as a trimer of three similar protein
+    units. Each unit contains an HA1 and an HA2 portion.
   </p>
 
+
+</div>
+</div>
+  <!-- Clicking this button calls the JavaScript function above. -->
+  <p>
+      <button id="rotationButton" onclick="toggleRotation()">
+    Start Rotation
+  </button>
+    <button onclick="showMonomerAB()">
+       Show one HA monomer A+B
+     </button> 
+<button onclick="resetTrimerView()">
+  Reset Trimer View
+</button>
+  </p>
 </body>
 </html>

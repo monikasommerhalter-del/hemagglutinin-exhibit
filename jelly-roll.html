@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Hemagglutinin Jelly-Roll Fold</title>
+
+  <!-- Load the JSmol library -->
+  <script src="jsmol/JSmol.min.js"></script>
+<style>
+  .baseline-panel {
+    border-left: 6px solid #e6c200;
+  }
+
+  .sheet-label {
+    color: #c9a900;
+    font-weight: bold;
+  }
+
+  .helix-label {
+    color: #c000a0;
+    font-weight: bold;
+  }
+</style>
+  <style>
+  .sequence-gradient {
+      display: inline-block;
+    background: linear-gradient(
+      to right,
+      #244cff,
+      #00bfff,
+      #00d65a,
+      #a8e600,
+      #ffd000,
+      #ff8c00,
+      #ef2020    
+    );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: bold;
+  }
+
+  .n-terminus {
+    color: #244cff;
+    font-weight: bold;
+  }
+
+  .c-terminus {
+    color: #ef2020;
+    font-weight: bold;
+  }
+
+.strand-1 { color: #244cff; }  /* blue */
+.strand-2 { color: #00bfff; }  /* green */
+.strand-3 { color: #00bfff; }  /* purple */
+.strand-4 { color: #00d65a; }  /* yellow */
+.strand-5 { color: #a8e600; }  /* cyan */
+.strand-6 { color: #ffd000; }  /* orange */
+.strand-7 { color: #ff8c00; }  /* red */
+.strand-8 { color: #ef2020; }  /* red, adjustable */
+</style>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 25px;
+    }
+
+    .page-layout {
+      display: flex;
+      gap: 25px;
+      align-items: flex-start;
+    }
+
+    #jmolWindow {
+      width: 700px;
+      height: 600px;
+    }
+
+    .text-panel {
+      width: 300px;
+      padding: 15px;
+      background-color: #f3f3f3;
+      border: 1px solid #cccccc;
+      border-radius: 8px;
+      line-height: 1.4;
+    }
+
+    button {
+      margin: 8px 4px;
+      padding: 8px 12px;
+    }
+  </style>
+
+  <script>
+    // This variable will hold the molecular viewer.
+    var jmol;
+
+    // These settings tell JSmol how to create the viewer.
+    var Info = {
+      width: 700,
+      height: 600,
+      use: "HTML5",
+      j2sPath: "jsmol/j2s",
+      color: "white",
+      addSelectionOptions: false,
+
+      // Commands that run when the page first loads.
+      script:
+        "load models/3UBE.pdb;" +
+        "select all;" +
+       "restrict none;" +
+        "cartoons off;" +
+        "wireframe off;" +
+        "spacefill off;" +
+        "ribbons off;" +
+
+        "select :A and 149-256;" +
+        "restrict selected;" +
+        "cartoons on;" +
+        "color structure;" +
+        "center selected;" +
+        "background black;" +
+        "zoom 250;" +
+        "reset;" + 
+        "center {33.96696031746032 -9.26258049886621 -6.816190476190479};"+
+        "rotate z 143.51;"+
+        "rotate y 100.09;"+ "rotate z -109.62;" + 
+        "zoom 250.0;" +
+        "set rotationRadius 120.21;" +
+        "spin off;"
+    };
+
+    // Create the JSmol viewer.
+    function startJmol() {
+      jmol = Jmol.getApplet("jmol", Info);
+
+      document.getElementById("jmolWindow").innerHTML =
+        Jmol.getAppletHtml(jmol);
+    }
+
+var isSpinning = false; 
+
+function showJellyRollBaseline() {
+  var script =
+    "model 1.1;" +
+    "select all;" +
+    "restrict none;" +
+    "cartoons off;" +
+    "wireframe off;" +
+    "spacefill off;" +
+    "ribbons off;" +
+
+    "select :A and 149-256;" +
+    "restrict selected;" +
+    "cartoons on;" +
+    "color structure;" +
+    "center selected;" +
+
+    "background black;" +
+    "reset;" +
+    "center {33.96696031746032 -9.26258049886621 -6.816190476190479};" +
+    "rotate z 143.51;" +
+    "rotate y 100.09;" +
+    "rotate z -109.62;" +
+    "zoom 250;" +
+    "set rotationRadius 120.21;" +
+    "spin off;";
+
+  Jmol.script(jmol, script);
+
+  document.getElementById("textPanel").innerHTML = `
+    <h2>Explore the jelly-roll motif</h2>
+
+  <p>
+    A jelly-roll fold consists of two four-stranded
+    <span class="sheet-label">β-sheets</span>
+    packed face-to-face. The β-strands are arranged antiparallel,
+    with adjacent strands running in opposite N→C directions.
+  </p>
+
+  <p class="structure-key">
+    <span class="sheet-label">Yellow:</span> β-strands
+    &nbsp;&nbsp;
+    <span class="helix-label">Magenta:</span> α-helix
+  </p>
+
+  <p>
+    Click <strong>Color by Sequence</strong> to trace the polypeptide
+    chain from the
+    <span class="n-terminus">N-terminus</span>
+    toward the
+    <span class="c-terminus">C-terminus</span>.
+  </p>
+  `;
+
+  isSpinning = false;
+  document.getElementById("rotationButton").textContent =
+    "Start Rotation";
+}
+
+function toggleRotation() {
+  if (isSpinning === false) {
+    Jmol.script(jmol, "spin on;");
+    isSpinning = true;
+    document.getElementById("rotationButton").textContent =
+      "Stop Rotation";
+  } else {
+    Jmol.script(jmol, "spin off;");
+    isSpinning = false;
+    document.getElementById("rotationButton").textContent =
+      "Start Rotation";
+  }
+}
+
+function resetJellyRollView() {
+  showJellyRollBaseline();
+}
+
+function tourJellyRoll() {
+  var script =
+    "spin off;" +
+    "rotate y 360;" +
+    "delay 1;" +
+    "rotate x 90;" +
+    "delay 1;" +
+    "rotate y -180;" +
+    "delay 1;" +
+    "rotate x -45;" +
+    "delay 1;";
+
+  Jmol.script(jmol, script);
+}
+ function showJellyRollSequence() {
+
+  // Change the webpage text first.
+  var textPanel = document.getElementById("textPanel");
+
+  if (!textPanel) {
+    alert("The textPanel element was not found.");
+    return;
+  }
+
+  textPanel.innerHTML = `
+    <h2>Jelly roll topology</h2>
+
+<p>
+  The
+  <span class="sequence-gradient">blue-to-red color gradient</span>
+  traces the polypeptide chain from the N-terminus toward the C-terminus.
+</p>
+
+<p>
+  The eight β-strands occur in sequence order
+  <span class="sequence-gradient">1–2–3–4–5–6–7–8</span>,
+  but their spatial arrangement is
+  <strong>
+    <span class="strand-8">8</span>–
+    <span class="strand-1">1</span>–
+    <span class="strand-2">2</span>–
+    <span class="strand-7">7</span>–
+    <span class="strand-4">4</span>–
+    <span class="strand-5">5</span>–
+    <span class="strand-6">6</span>–
+    <span class="strand-3">3</span>
+  </strong>.
+</p>
+  `;
+
+  // Then change the molecular display.
+  var script =
+    "select :A and 149-256;" +
+    "color groups;" +
+    "center selected;" +
+    "zoom 250;" +
+    "spin off;";
+
+  Jmol.script(jmol, script);
+
+  isSpinning = false;
+  document.getElementById("rotationButton").textContent =
+    "Start Rotation";
+}
+  </script>
+</head>
+
+
+
+
+<body onload="startJmol()">
+
+  <nav>
+    <a href="index.html">Home</a>
+  </nav>
+
+  <h1>Hemagglutinin: The Jelly-Roll Fold</h1>
+
+  <p>
+    This page examines chain A, residues 149–256, which form a jelly roll motif.
+      </p>
+
+  <div class="page-layout">
+
+    <!-- JSmol molecular viewer -->
+    <div id="jmolWindow">
+      Loading molecular viewer...
+    </div>
+
+    <!-- Explanatory text -->
+   <!-- Explanatory text -->
+
+   <div class="text-panel baseline-panel" id="textPanel">
+
+  <h2>Explore the jelly-roll motif</h2>
+
+  <p>
+    A jelly-roll fold consists of two four-stranded
+    <span class="sheet-label">β-sheets</span>
+    packed face-to-face. The β-strands are arranged antiparallel,
+    with adjacent strands running in opposite N→C directions.
+  </p>
+
+  <p class="structure-key">
+    <span class="sheet-label">Yellow:</span> β-strands
+    &nbsp;&nbsp;
+    <span class="helix-label">Magenta:</span> α-helix
+  </p>
+
+    <p>
+    Click <strong>Color by Sequence</strong> to trace the polypeptide
+    chain from the
+    <span class="n-terminus">N-terminus</span>
+    toward the
+    <span class="c-terminus">C-terminus</span>.
+  </p>
+
+
+</div> <!-- closes text-panel -->
+
+</div> <!-- closes page-layout -->
+
+<p>
+  <button id="rotationButton" onclick="toggleRotation()">
+    Start Rotation
+  </button>
+
+  <button onclick="tourJellyRoll()">
+    View from Different Angles
+  </button>
+
+  <button onclick="showJellyRollSequence()">
+    Color by Sequence
+  </button>
+
+  <button onclick="resetJellyRollView()">
+    Reset Jelly Roll View
+  </button>
+</p>
+
+</body>
+</html>
